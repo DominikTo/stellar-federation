@@ -1,0 +1,22 @@
+{
+    "name": "dominik/stellar-federation",
+    "description": "Federation server for Stellar, a decentralized protocol for sending and receiving money in any pair of currencies.",
+    "keywords": ["Stellar", "Federation", "Server", "Cryptocurrency"],
+    "homepage": "https://github.com/DominikTo/stellar-federation",
+    "license" : "BSD-3-Clause",
+    "require": {
+        "sabre/http": "~2.0.4",
+        "ext-mbstring": "*"
+    },
+    "authors": [
+        {
+            "name": "Dominik Tobschall",
+            "email": "dtobschall@gmail.com"
+        }
+    ],
+    "autoload" : {
+        "psr-4" : {
+            "Dominik\\Stellar\\Federation\\" : "src/"
+        }
+    }
+}
