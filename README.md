@@ -1,6 +1,6 @@
 # Stellar federation server
 
-> This is still work in progress. Use at your own risk.
+> Work in progress. Use at your own risk.
 
 This server provides Stellar federation for your domain.
 
@@ -10,61 +10,58 @@ The [federation protocol](https://wiki.stellar.org/Federation) allows payment sy
 
 ## Setting up federation
 
-Whenever a Stellar client tries to make a payment to user@example.org it tries to request a file called `stellar.txt` from the following URLs, until one request is successful:
-
-1. https://stellar.example.org/stellar.txt
-2. https://example.org/stellar.txt
-3. https://www.example.org/stellar.txt
-
-The file `stellar.txt` tells the client how to reach the federation server. Once the client knows the URL of the federation server it asks the federation server for the users wallet address.
+Whenever a Stellar client tries to make a payment to user@example.org it tries to request a file called `stellar.txt` from three different URLs on your server (more on `stellar.txt` below). This file tells the client how to reach the federation server. Once the client knows the URL of the federation server it asks the federation server for the users wallet address.
 
 > Both the server serving the stellar.txt file as well as your federation server need a valid SSL certificate.
 
-### stellar.txt
+### Federation server
 
-Make sure that the file `stellar.txt` is served in one of the locations mentioned above and don't forget to adjust the URL to the actual URL of your federation server.
+The easiest and quickest way to get a federation server up and running is to init a new git repository, require `dominik/stellar-federation` as a dependency via composer, create a new [Heroku](http://heroku.com) application and push it there. When using Heroku it's already taken care of the webserver config in the `Procfile` - if you use something else, you'll have to configure your webserver yourself. For Heroku you'll need their command line tools set up on your machine (On a Mac simply install via `brew install heroku-toolbelt`). If you don't have composer on your machine, the instructions can be found on the [composer website](https://getcomposer.org/doc/00-intro.md#globally).
+
+#### Now it's time to set up your project:
+
+* Create a new git repository somewhere on your machine with `git init`
+* Run `composer init` to initialize your new project
+  * You should set `minimum-stability` to `dev`
+  * When asked for dependencies enter `dominik/stellar-federation` with `dev-master` as the version constraint
+  * You'll also need the mbstring extension, so make sure to require `ext-mbstring` with `*` as the version constraint as well
+* Then run `composer install` to pull in the dependencies
+
+#### Next up you'll have to configure your federation server:
+
+* Create the directory `public/` in your project.
+  * Copy the example server into the directory `cp vendor/dominik/stellar-federation/example/server.php public/index.php`
+  * Configure `public/index.php` as needed with your domain and users you want to provide federation for
+* Copy the Heroku Procfile into the root directory of your project `cp vendor/dominik/stellar-federation/example/Procfile .`
+
+#### Deploy to Heroku (or elsewhere):
+
+* Add everything to git with `git add .`
+* Commit your changes `git commit -m "Initial commit"`
+* Create a new Heroku application `heroku apps:create`
+* Push to Heroku `git push heroku master`
+
+### Configure stellar.txt
+
+The last step is to bring the `stellar.txt` file in place to tell Stellar clients where to find your federation server in one of these locations:
+
+* https://stellar.example.org/stellar.txt
+* https://example.org/stellar.txt
+* https://www.example.org/stellar.txt
+
+Don't forget to adjust the URL in `stellar.txt` to the actual location of your federation server.
 
 ```
 [federation_url]
-https://url-of-your-federation-server/directory
+https://example.herokuapp.com
 ```
-
-### Federation server
-
-Next up you'll have to set up the federation server itself in the location that you've configured in the `stellar.txt` file. The easiest and quickest way to get this up and running is just cloning this repository, creating a new [Heroku](http://heroku.com) application and pushing it there. When using Heroku it's already taken care of the webserver config in the `Procfile` - if you use something else, you have to configure your webserver yourself:
-
-#### Webserver config
-
-Configure your webserver document root to `public/` and make sure that query strings don't get lost:
-
-#### Apache
-
-```
-RewriteRule ^/(.*)$ /index.php [L]
-```
-
-#### Nginx
-
-```
-index index.php;
-
-location / {
-    try_files $uri /index.php?$args;
-}
-```
-
-#### Configure user and domains
-
-Don't forget to configure the domains, users and their wallet addresses you want this server to provide federation service for.
-
-> @TODO: Currently this is hardcoded in `public/index.php`.
 
 ## Usage
 
 If you did everything correctly you should now be able to query your federation server like this:
 
 ```
-curl -i 'https://example.org?type=federation&user=user&domain=example.org'
+curl -i 'https://example.herokuapp.com?type=federation&user=user&domain=example.org'
 
 HTTP/1.1 200 OK
 Connection: keep-alive
