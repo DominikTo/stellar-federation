@@ -5,6 +5,10 @@
  */
 namespace Dominik\Stellar\Federation;
 
+use Dominik\Stellar\Federation\Exception\MethodNotAllowed;
+use Dominik\Stellar\Federation\Exception\InvalidParams;
+use Dominik\Stellar\Federation\Exception\NoSuchDomain;
+use Dominik\Stellar\Federation\Exception\NoSuchUser;
 use Sabre\HTTP;
 
 
@@ -28,9 +32,6 @@ class Server {
     private function federationHandler($user, $domain) {
 
         $result = $this->getUser($user, $domain);
-        if(!$result) {
-            throw new \UnexpectedValueException('User not found');
-        }
 
         return [
             'result' => 'success',
@@ -45,26 +46,20 @@ class Server {
     }
 
     /*
-     * @TODO proper exception handling instead of noSuchUser for everything.
+     * @TODO Add support for noSupported and unavailable exception.
      *
-     * noSuchUser
-     *  The supplied user was not found.
      * noSupported
      *  Look up by tag is not supported.
-     * noSuchDomain
-     *  The supplied domain is not served here.
-     * invalidParams
-     *  Missing or conflicting parameters.
      * unavailable
      *  Service is temporarily unavailable.
      */
     function returnException($e) {
 
-        $httpCode = 404;
+        $httpCode = $e->getHTTPcode();
 
         $response = [
-            'error' => 'noSuchUser',
-            'error_message' => 'No user found',
+            'error' => $e->getError(),
+            'error_message' => $e->getMessage(),
             'result' => 'error',
             'request' => $this->request->getQueryParameters(),
         ];
@@ -83,11 +78,11 @@ class Server {
     private function getUser($user, $domain) {
 
         if(!isset($this->resolver[$domain])) {
-            return false;
+            throw new NoSuchDomain('The supplied domain is not served here.');
         }
 
         if(!isset($this->resolver[$domain][$user])) {
-            return false;
+            throw new NoSuchUser('The supplied user was not found.');
         }
 
         return [
@@ -111,28 +106,28 @@ class Server {
         try {
 
             if ($this->request->getMethod() !== 'GET') {
-                throw new \UnexpectedValueException('HTTP method must be GET');
+                throw new MethodNotAllowed('HTTP method must be GET');
             }
 
             $getVars = $this->request->getQueryParameters();
 
             $type = isset($getVars['type']) ? $getVars['type'] : false;
             if (!$type) {
-                    throw new \UnexpectedValueException('No type given');
+                    throw new InvalidParams('No type given');
             }
 
             if (!in_array($type, $this->allowedTypes)) {
-                throw new \UnexpectedValueException('Unknown type: ' . $type);
+                throw new InvalidParams('Unknown type: ' . $type);
             }
 
             $user = isset($getVars['user']) ? $getVars['user'] : false;
             if (!$user) {
-                    throw new \UnexpectedValueException('No user given');
+                    throw new InvalidParams('No user given');
             }
 
             $domain = isset($getVars['domain']) ? $getVars['domain'] : false;
-            if (!isset($domain)) {
-                    throw new \UnexpectedValueException('No domain given');
+            if (!$domain) {
+                    throw new InvalidParams('No domain given');
             }
 
             $result = call_user_func([$this, $type.'Handler'], $user, $domain);
