@@ -41,6 +41,8 @@ The easiest and quickest way to get a federation server up and running is to ini
 * Create a new Heroku application `heroku apps:create`
 * Push to Heroku `git push heroku master`
 
+> Whenever you want to update, just run `composer update` in your project, commit the updated composer.lock and deploy again.
+
 ### Configure stellar.txt
 
 The last step is to bring the `stellar.txt` file in place to tell Stellar clients where to find your federation server in one of these locations:
