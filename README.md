@@ -6,7 +6,7 @@ This server provides Stellar federation for your domain.
 
 [Stellar](https://stellar.org) is a decentralized protocol for sending and receiving money in any pair of currencies.
 
-The [federation protocol](https://wiki.stellar.org/Federation) allows payment systems to federate in the Stellar network via the creation of gateways. Each gateway is responsible for creation and managing user' accounts. Gateway users are provided a payment address similar to user@example.org while this address can be used to send and receive payments from any other user on the Stellar network. Main benefit for users is the ability to remember and easily tell others their address.
+The Stellar [federation protocol](https://wiki.stellar.org/Federation) makes it possible to set up federated addresses for your domain. That means, that if you control the domain example.org, you could receive payments under e.g. user@example.org. Check out this [blog post](http://tobschall.de/2014/08/08/federated-stellar-addresses/) if you want to learn more about Stellar federation.
 
 ## Setting up federation
 
