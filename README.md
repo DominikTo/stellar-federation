@@ -23,8 +23,9 @@ The easiest and quickest way to get a federation server up and running is to ini
 * Create a new git repository somewhere on your machine with `git init`
 * Run `composer init` to initialize your new project
   * You should set `minimum-stability` to `dev`
-  * When asked for dependencies enter `dominik/stellar-federation` with `dev-master` as the version constraint
+  * When asked for dependencies enter `dominik/stellar-federation` with `master` as the version constraint
   * You'll also need the mbstring extension, so make sure to require `ext-mbstring` with `*` as the version constraint as well
+  * You'll also need to create .gitignore with `/vendor/`
 * Then run `composer install` to pull in the dependencies
 
 #### Next up you'll have to configure your federation server:
